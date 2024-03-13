@@ -1,16 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"net"
 )
 
 type HttpRequest struct {
-	Method          string
-	Uri             string
-	Version         string
-	Host            string
-	Accept          string
-	AcceptLanguange string
+	Method         string
+	Uri            string
+	Version        string
+	Host           string
+	Accept         string
+	AcceptLanguage string
 }
 
 type HttpResponse struct {
@@ -54,6 +55,15 @@ func ResponseDecoder(bytestream []byte) HttpResponse {
 
 func RequestEncoder(req HttpRequest) []byte {
 	var result string
+
+	// Construct the request line
+	requestLine := fmt.Sprintf("%s %s %s", req.Method, req.Uri, req.Version)
+
+	// Construct other header fields
+	headers := fmt.Sprintf("Host: %s\r\nAccept: %s\r\nAccept-Language: %s\r\n", req.Host, req.Accept, req.AcceptLanguage)
+
+	// Combine the request line, headers, and an empty line to separate header and data
+	result = fmt.Sprintf("%s\r\n%s\r\n", requestLine, headers)
 
 	return []byte(result)
 
