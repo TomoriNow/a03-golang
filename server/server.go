@@ -40,8 +40,30 @@ type Student struct {
 }
 
 func main() {
-	//The Program logic should go here.
+	listenAddress, err := net.ResolveTCPAddr(SERVER_TYPE, net.JoinHostPort(SERVER_HOST, SERVER_PORT))
+	if err != nil {
+		log.Fatalln(err)
+	}
 
+	socket, err := net.ListenTCP(SERVER_TYPE, listenAddress)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("TCP Server Socket Program Example in Go that will connect to server\n")
+	fmt.Printf("Press Ctrl+C or Cmd+C to stop the program\n")
+	fmt.Printf("[%s] Listening on: %s\n", SERVER_TYPE, socket.Addr())
+
+	defer socket.Close()
+
+	for {
+		connection, err := socket.AcceptTCP()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		go HandleConnection(connection)
+	}
 }
 
 func HandleConnection(connection net.Conn) {
@@ -127,6 +149,7 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 
 	req.Method, req.Uri, req.Version = ExtractRequestLine(lines[0])
 
+
 	hostLine := lines[1]
 	parts := strings.Split(hostLine, ": ")
 	req.Host = parts[1]
@@ -138,11 +161,13 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 	acceptLanguageLine := lines[3]
 	parts = strings.Split(acceptLanguageLine, ": ")
 	req.AcceptLanguange = parts[1]
+	req.AcceptLanguange = parts[1]
 
 	return req
 
 }
 
+func ExtractRequestLine(requestLine string) (string, string, string) {
 func ExtractRequestLine(requestLine string) (string, string, string) {
 	parts := strings.Split(requestLine, " ")
 	return parts[0], parts[1], parts[2]
@@ -154,4 +179,7 @@ func ResponseEncoder(res HttpResponse) []byte {
 	
 	return []byte(result)
 
+}
+func logic(input string) (string, error) {
+	return strings.ToUpper(input), nil
 }
