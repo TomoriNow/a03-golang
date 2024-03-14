@@ -196,6 +196,9 @@ func ResponseEncoder(res HttpResponse) []byte {
 	result = fmt.Sprintf("%s\r\n%s\r\n%s", requestLine, headers, res.Data)
 	fmt.Println(result)
 
+	responseLine := fmt.Sprintf("%s %s\r\n", res.Version, res.StatusCode)
+	headers := fmt.Sprintf("Content-Type: %s\r\nContent-Language: %s\r\n\r\n", res.ContentType, res.ContentLanguage)
+	result = responseLine + headers + res.Data
 	return []byte(result)
 
 }
