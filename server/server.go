@@ -161,13 +161,11 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 	acceptLanguageLine := lines[3]
 	parts = strings.Split(acceptLanguageLine, ": ")
 	req.AcceptLanguange = parts[1]
-	req.AcceptLanguange = parts[1]
 
 	return req
 
 }
 
-func ExtractRequestLine(requestLine string) (string, string, string) {
 func ExtractRequestLine(requestLine string) (string, string, string) {
 	parts := strings.Split(requestLine, " ")
 	return parts[0], parts[1], parts[2]
