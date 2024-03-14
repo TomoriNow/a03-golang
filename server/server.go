@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net"
 	"strings"
 )
@@ -36,12 +38,59 @@ type Student struct {
 }
 
 func main() {
-	//The Program logic should go here.
+	listenAddress, err := net.ResolveTCPAddr(SERVER_TYPE, net.JoinHostPort(SERVER_HOST, SERVER_PORT))
+	if err != nil {
+		log.Fatalln(err)
+	}
 
+	socket, err := net.ListenTCP(SERVER_TYPE, listenAddress)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("TCP Server Socket Program Example in Go that will connect to server\n")
+	fmt.Printf("Press Ctrl+C or Cmd+C to stop the program\n")
+	fmt.Printf("[%s] Listening on: %s\n", SERVER_TYPE, socket.Addr())
+
+	defer socket.Close()
+
+	for {
+		connection, err := socket.AcceptTCP()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		go HandleConnection(connection)
+	}
 }
 
 func HandleConnection(connection net.Conn) {
-	//This progrom handles the incoming request from client
+	fmt.Printf("[%s] Receive connection from %s\n", SERVER_TYPE, connection.RemoteAddr())
+	fmt.Printf("[%s] [Client: %s] Creating receive buffer for connection of size %d\n", SERVER_TYPE, connection.RemoteAddr(), BUFFER_SIZE)
+	receiveBuffer := make([]byte, BUFFER_SIZE)
+
+	defer connection.Close()
+
+	receiveLength, err := connection.Read(receiveBuffer)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("[%s] [Client: %s] Received %d bytes of message\n", SERVER_TYPE, connection.RemoteAddr(), receiveLength)
+	message := string(receiveBuffer[:receiveLength])
+
+	fmt.Printf("[%s] [Client: %s] Message: %s\n", SERVER_TYPE, connection.RemoteAddr(), message)
+
+	response, err := logic(message)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("[%s] [Client: %s] Sending Response: %s\n", SERVER_TYPE, connection.RemoteAddr(), response)
+	_, err = connection.Write([]byte(response))
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 }
 
@@ -59,7 +108,7 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 	lines := strings.Split(reqString, "\r\n")
 
 	req.Method, req.Uri, req.Version = ExtractRequestLine(lines[0])
-	
+
 	hostLine := lines[1]
 	parts := strings.Split(hostLine, ": ")
 	req.Host = parts[1]
@@ -70,13 +119,13 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 
 	acceptLanguageLine := lines[3]
 	parts = strings.Split(acceptLanguageLine, ": ")
-	req.AcceptLanguange = parts[1] 
+	req.AcceptLanguange = parts[1]
 
 	return req
 
 }
 
-func ExtractRequestLine (requestLine string) (string, string, string) {
+func ExtractRequestLine(requestLine string) (string, string, string) {
 	parts := strings.Split(requestLine, " ")
 	return parts[0], parts[1], parts[2]
 }
@@ -87,4 +136,7 @@ func ResponseEncoder(res HttpResponse) []byte {
 
 	return []byte(result)
 
+}
+func logic(input string) (string, error) {
+	return strings.ToUpper(input), nil
 }
