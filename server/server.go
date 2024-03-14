@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"strings"
 )
 
 const (
@@ -53,8 +54,31 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 	//Put the decoding program for HTTP Request Packet here
 	var req HttpRequest
 
+	reqString := string(bytestream)
+
+	lines := strings.Split(reqString, "\r\n")
+
+	req.Method, req.Uri, req.Version = ExtractRequestLine(lines[0])
+	
+	hostLine := lines[1]
+	parts := strings.Split(hostLine, ": ")
+	req.Host = parts[1]
+
+	acceptLine := lines[2]
+	parts = strings.Split(acceptLine, ": ")
+	req.Accept = parts[1]
+
+	acceptLanguageLine := lines[3]
+	parts = strings.Split(acceptLanguageLine, ": ")
+	req.AcceptLanguange = parts[1] 
+
 	return req
 
+}
+
+func ExtractRequestLine (requestLine string) (string, string, string) {
+	parts := strings.Split(requestLine, " ")
+	return parts[0], parts[1], parts[2]
 }
 
 func ResponseEncoder(res HttpResponse) []byte {
