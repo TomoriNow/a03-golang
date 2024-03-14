@@ -82,8 +82,6 @@ func HandleConnection(connection net.Conn) {
 	request := RequestDecoder(rawRequest)
 
 	response := HandleRequest(request)
-
-
 }
 
 func HandleRequest(req HttpRequest) HttpResponse {
@@ -149,7 +147,6 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 
 	req.Method, req.Uri, req.Version = ExtractRequestLine(lines[0])
 
-
 	hostLine := lines[1]
 	parts := strings.Split(hostLine, ": ")
 	req.Host = parts[1]
@@ -174,7 +171,7 @@ func ExtractRequestLine(requestLine string) (string, string, string) {
 func ResponseEncoder(res HttpResponse) []byte {
 	//Put the encoding program for HTTP Response Struct here
 	var result string
-	
+
 	return []byte(result)
 
 }
