@@ -32,6 +32,10 @@ type Student struct {
 	Nama string
 	Npm  string
 }
+type Students struct {
+	XMLName xml.Name
+	Students []Student 
+}
 
 const (
 	SERVER_TYPE = "tcp"
@@ -41,21 +45,22 @@ const (
 func main() {
 
 	fmt.Printf("[%s] Creating receive buffer of size %d\n", SERVER_TYPE, BUFFER_SIZE)
-	receiveBuffer := make([]byte, BUFFER_SIZE)
-
 	fmt.Print("input the url: ")
 	url, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	url = strings.TrimRight(url, "\r\n")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	fmt.Print("input the data type ")
 	mimeType, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	mimeType = strings.TrimRight(mimeType, "\r\n")
 	if err != nil {
 		log.Fatalln(err)
 	}
 	fmt.Print("Input the language: ")
 	language, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	language = strings.TrimRight(language, "\r\n")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -87,7 +92,9 @@ func main() {
 	defer socket.Close()
 
 	response, students, _ := Fetch(request, socket)
+	fmt.Println(response)
 	fmt.Println("Status: ", response.StatusCode)
+	fmt.Print("Body:")
 	if response.ContentType == "text/html" {
 		fmt.Println(response.Data)
 	} else if response.ContentType == "application/xml" {
@@ -95,13 +102,6 @@ func main() {
 	} else if response.ContentType == "application/json" {
 		fmt.Println(students)
 	}
-
-	receiveLength, err := socket.Read(receiveBuffer)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	fmt.Printf("[%s] Received %d bytes of message from server\n", SERVER_TYPE, receiveLength)
 }
 
 func getHostAndPortFromUrl(url string) (string, string) {
@@ -145,15 +145,20 @@ func Fetch(req HttpRequest, connection net.Conn) (HttpResponse, []Student, HttpR
 
 	connection.Read(responseBytes)
 
-	response := ResponseDecoder(responseBytes)
-
-	if response.ContentType == "application/xml" {
-		err := xml.Unmarshal([]byte(response.Data), &students)
+	res = ResponseDecoder(responseBytes)
+	fmt.Println(res.Data)
+	if res.ContentType == "application/xml" {
+		var xmlStudents Students
+		err := xml.Unmarshal([]byte(res.Data), &xmlStudents)
 		if err != nil {
 			log.Fatalln(err)
 		}
-	} else if response.ContentType == "application/json" {
-		err := json.Unmarshal([]byte(response.Data), &students)
+		fmt.Println(xmlStudents)
+		students = xmlStudents.Students
+	} else if res.ContentType == "application/json" {
+		filteredData := strings.ReplaceAll(res.Data, "\x00", "")
+		fmt.Println(filteredData)
+		err := json.Unmarshal([]byte(filteredData), &students)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -206,6 +211,7 @@ func RequestEncoder(req HttpRequest) []byte {
 	headers := fmt.Sprintf("Host: %s\r\nAccept: %s\r\nAccept-Language: %s\r\n", req.Host, req.Accept, req.AcceptLanguage)
 
 	result = fmt.Sprintf("%s\r\n%s\r\n", requestLine, headers)
+	fmt.Println(result)
 
 	return []byte(result)
 

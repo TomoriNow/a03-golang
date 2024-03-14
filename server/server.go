@@ -14,7 +14,7 @@ const (
 	SERVER_PORT = ""
 	SERVER_TYPE = "tcp"
 	BUFFER_SIZE = 1024
-	GROUP_NAME  = ""
+	GROUP_NAME  = "ATTN_FTASAP"
 )
 
 type HttpRequest struct {
@@ -37,6 +37,11 @@ type HttpResponse struct {
 type Student struct {
 	Nama string
 	Npm  string
+}
+
+type Students struct {
+	XMLName xml.Name
+	Students []Student 
 }
 
 func main() {
@@ -82,6 +87,11 @@ func HandleConnection(connection net.Conn) {
 	request := RequestDecoder(rawRequest)
 
 	response := HandleRequest(request)
+	
+	_, err = connection.Write(ResponseEncoder(response))
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func HandleRequest(req HttpRequest) HttpResponse {
@@ -89,7 +99,7 @@ func HandleRequest(req HttpRequest) HttpResponse {
 	//This program handles the routing to each view handler.
 	response.StatusCode = "404"
 	if req.Uri == "/" || req.Uri == "/?name="+GROUP_NAME {
-		response.Data = "<html><body><h1>Halo, kami dari Klepon</h1></body>>/html>"
+		response.Data = "<html><body><h1>Halo, kami dari Klepon</h1></body></html>"
 		response.StatusCode = "200"
 		response.ContentType = "text/html"
 	}
@@ -100,14 +110,15 @@ func HandleRequest(req HttpRequest) HttpResponse {
 			{Nama: "Galih", Npm: "2206046696"},
 		}
 		if strings.Contains(req.Accept, "xml") {
-			xmlData, err := xml.Marshal(students)
+			xmlStudents := Students{Students: students}
+			xmlData, err := xml.Marshal(xmlStudents)
 			if err != nil {
 				fmt.Println("Error:", err)
 			}
 			response.StatusCode = "200"
 			response.ContentType = "application/xml"
 			response.Data = string(xmlData)
-		} else if strings.Contains(req.Accept, "json") || strings.Contains(req.Accept, "q=") {
+		} else if strings.Contains(req.Accept, "json") {
 			jsonData, err := json.Marshal(students)
 			if err != nil {
 				fmt.Println("Error:", err)
@@ -119,11 +130,11 @@ func HandleRequest(req HttpRequest) HttpResponse {
 	}
 	if req.Uri == "/greeting" {
 		if strings.Contains(req.AcceptLanguange, "id") {
-			response.Data = "<html><body><h1>Halo, kami dari Klepon</h1></body>>/html>"
+			response.Data = "<html><body><h1>Halo, kami dari Klepon</h1></body></html>"
 			response.ContentType = "text/html"
 			response.StatusCode = "200"
-		} else if strings.Contains(req.AcceptLanguange, "en") || strings.Contains(req.Accept, "q=") {
-			response.Data = "<html><body><h1>Hello, we are from Klepon</h1></body>>/html>"
+		} else if strings.Contains(req.AcceptLanguange, "en") {
+			response.Data = "<html><body><h1>Hello, we are from Klepon</h1></body></html>"
 			response.ContentType = "text/html"
 			response.StatusCode = "200"
 		}
@@ -131,9 +142,9 @@ func HandleRequest(req HttpRequest) HttpResponse {
 
 	if response.StatusCode != "404" {
 		response.ContentLanguage = req.AcceptLanguange
-		response.Version = req.Version
 	}
 
+	response.Version = req.Version
 	return response
 }
 
@@ -142,8 +153,8 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 	var req HttpRequest
 
 	reqString := string(bytestream)
-
 	lines := strings.Split(reqString, "\r\n")
+	fmt.Println(lines[0])
 
 	req.Method, req.Uri, req.Version = ExtractRequestLine(lines[0])
 
@@ -158,6 +169,7 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 	acceptLanguageLine := lines[3]
 	parts = strings.Split(acceptLanguageLine, ": ")
 	req.AcceptLanguange = parts[1]
+	fmt.Println(req.Host)
 
 	return req
 
@@ -171,10 +183,19 @@ func ExtractRequestLine(requestLine string) (string, string, string) {
 func ResponseEncoder(res HttpResponse) []byte {
 	//Put the encoding program for HTTP Response Struct here
 	var result string
+	var statusMessage string
+	if res.StatusCode == "200" {
+		statusMessage = "OK"
+	} else {
+		statusMessage = "Not Found"
+	}
+	requestLine := fmt.Sprintf("%s %s %s", res.Version, res.StatusCode, statusMessage)
+
+	headers := fmt.Sprintf("Content-Type: %s\r\nContent-Language: %s\r\n", res.ContentType, res.ContentLanguage)
+
+	result = fmt.Sprintf("%s\r\n%s\r\n%s", requestLine, headers, res.Data)
+	fmt.Println(result)
 
 	return []byte(result)
 
-}
-func logic(input string) (string, error) {
-	return strings.ToUpper(input), nil
 }
