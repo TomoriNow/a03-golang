@@ -33,8 +33,8 @@ type Student struct {
 	Npm  string
 }
 type Students struct {
-	XMLName xml.Name
-	Students []Student 
+	XMLName  xml.Name
+	Students []Student
 }
 
 const (
@@ -52,7 +52,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	fmt.Print("input the data type ")
+	fmt.Print("input the data type: ")
 	mimeType, err := bufio.NewReader(os.Stdin).ReadString('\n')
 	mimeType = strings.TrimRight(mimeType, "\r\n")
 	if err != nil {
