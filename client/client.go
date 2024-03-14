@@ -92,7 +92,6 @@ func main() {
 	defer socket.Close()
 
 	response, students, _ := Fetch(request, socket)
-	fmt.Println(response)
 	fmt.Println("Status: ", response.StatusCode)
 	fmt.Print("Body:")
 	if response.ContentType == "text/html" {
@@ -146,18 +145,15 @@ func Fetch(req HttpRequest, connection net.Conn) (HttpResponse, []Student, HttpR
 	connection.Read(responseBytes)
 
 	res = ResponseDecoder(responseBytes)
-	fmt.Println(res.Data)
 	if res.ContentType == "application/xml" {
 		var xmlStudents Students
 		err := xml.Unmarshal([]byte(res.Data), &xmlStudents)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fmt.Println(xmlStudents)
 		students = xmlStudents.Students
 	} else if res.ContentType == "application/json" {
 		filteredData := strings.ReplaceAll(res.Data, "\x00", "")
-		fmt.Println(filteredData)
 		err := json.Unmarshal([]byte(filteredData), &students)
 		if err != nil {
 			log.Fatalln(err)
@@ -211,7 +207,6 @@ func RequestEncoder(req HttpRequest) []byte {
 	headers := fmt.Sprintf("Host: %s\r\nAccept: %s\r\nAccept-Language: %s\r\n", req.Host, req.Accept, req.AcceptLanguage)
 
 	result = fmt.Sprintf("%s\r\n%s\r\n", requestLine, headers)
-	fmt.Println(result)
 
 	return []byte(result)
 

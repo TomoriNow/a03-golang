@@ -154,7 +154,6 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 
 	reqString := string(bytestream)
 	lines := strings.Split(reqString, "\r\n")
-	fmt.Println(lines[0])
 
 	req.Method, req.Uri, req.Version = ExtractRequestLine(lines[0])
 
@@ -169,7 +168,6 @@ func RequestDecoder(bytestream []byte) HttpRequest {
 	acceptLanguageLine := lines[3]
 	parts = strings.Split(acceptLanguageLine, ": ")
 	req.AcceptLanguange = parts[1]
-	fmt.Println(req.Host)
 
 	return req
 
@@ -196,9 +194,6 @@ func ResponseEncoder(res HttpResponse) []byte {
 	result = fmt.Sprintf("%s\r\n%s\r\n%s", requestLine, headers, res.Data)
 	fmt.Println(result)
 
-	responseLine := fmt.Sprintf("%s %s\r\n", res.Version, res.StatusCode)
-	headers := fmt.Sprintf("Content-Type: %s\r\nContent-Language: %s\r\n\r\n", res.ContentType, res.ContentLanguage)
-	result = responseLine + headers + res.Data
 	return []byte(result)
 
 }
