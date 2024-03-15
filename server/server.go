@@ -109,7 +109,7 @@ func HandleRequest(req HttpRequest) HttpResponse {
 			{Nama: "Gusti", Npm: "2206821241"},
 			{Nama: "Galih", Npm: "2206046696"},
 		}
-		if strings.Contains(req.Accept, "xml") {
+		if strings.Contains(req.Accept, "application/xm") {
 			xmlStudents := Students{Student: students}
 			xmlData, err := xml.Marshal(xmlStudents)
 			if err != nil {
