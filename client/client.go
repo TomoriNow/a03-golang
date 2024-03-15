@@ -93,7 +93,7 @@ func main() {
 
 	response, _, _ := Fetch(request, socket)
 	fmt.Println("Status: ", response.StatusCode)
-	fmt.Print("Body:", response.Data)
+	fmt.Println("Body:", response.Data)
 }
 
 func getHostAndPortFromUrl(url string) (string, string) {
