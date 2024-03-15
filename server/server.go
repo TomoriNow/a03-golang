@@ -14,7 +14,7 @@ const (
 	SERVER_PORT = "6696"
 	SERVER_TYPE = "tcp"
 	BUFFER_SIZE = 1024
-	GROUP_NAME  = "ATTN_FTASAP"
+	GROUP_NAME  = "VirtualBox"
 )
 
 type HttpRequest struct {
@@ -41,7 +41,7 @@ type Student struct {
 
 type Students struct {
 	XMLName xml.Name
-	Student []Student 
+	Student []Student
 }
 
 func main() {
@@ -87,7 +87,7 @@ func HandleConnection(connection net.Conn) {
 	request := RequestDecoder(rawRequest)
 
 	response := HandleRequest(request)
-	
+
 	_, err = connection.Write(ResponseEncoder(response))
 	if err != nil {
 		log.Fatalln(err)
