@@ -33,8 +33,8 @@ type Student struct {
 	Npm  string
 }
 type Students struct {
-	XMLName  xml.Name
-	Students []Student
+	XMLName xml.Name
+	Student []Student
 }
 
 const (
@@ -91,16 +91,9 @@ func main() {
 
 	defer socket.Close()
 
-	response, students, _ := Fetch(request, socket)
+	response, _, _ := Fetch(request, socket)
 	fmt.Println("Status: ", response.StatusCode)
-	fmt.Print("Body:")
-	if response.ContentType == "text/html" {
-		fmt.Println(response.Data)
-	} else if response.ContentType == "application/xml" {
-		fmt.Println(students)
-	} else if response.ContentType == "application/json" {
-		fmt.Println(students)
-	}
+	fmt.Print("Body:", response.Data)
 }
 
 func getHostAndPortFromUrl(url string) (string, string) {
@@ -151,7 +144,10 @@ func Fetch(req HttpRequest, connection net.Conn) (HttpResponse, []Student, HttpR
 		if err != nil {
 			log.Fatalln(err)
 		}
-		students = xmlStudents.Students
+		trimmedXML := strings.TrimPrefix(res.Data, "<Students>")
+		trimmedXML = strings.ReplaceAll(trimmedXML, "</Students>", "")
+		res.Data = trimmedXML
+		students = xmlStudents.Student
 	} else if res.ContentType == "application/json" {
 		filteredData := strings.ReplaceAll(res.Data, "\x00", "")
 		err := json.Unmarshal([]byte(filteredData), &students)
