@@ -11,7 +11,7 @@ import (
 
 const (
 	SERVER_HOST = ""
-	SERVER_PORT = "6696"
+	SERVER_PORT = "2963"
 	SERVER_TYPE = "tcp"
 	BUFFER_SIZE = 1024
 	GROUP_NAME  = "VirtualBox"
