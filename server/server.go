@@ -41,7 +41,7 @@ type Student struct {
 
 type Students struct {
 	XMLName xml.Name
-	Students []Student 
+	Student []Student 
 }
 
 func main() {
@@ -110,7 +110,7 @@ func HandleRequest(req HttpRequest) HttpResponse {
 			{Nama: "Galih", Npm: "2206046696"},
 		}
 		if strings.Contains(req.Accept, "xml") {
-			xmlStudents := Students{Students: students}
+			xmlStudents := Students{Student: students}
 			xmlData, err := xml.Marshal(xmlStudents)
 			if err != nil {
 				fmt.Println("Error:", err)
