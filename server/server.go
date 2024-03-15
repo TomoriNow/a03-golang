@@ -11,7 +11,7 @@ import (
 
 const (
 	SERVER_HOST = ""
-	SERVER_PORT = ""
+	SERVER_PORT = "6696"
 	SERVER_TYPE = "tcp"
 	BUFFER_SIZE = 1024
 	GROUP_NAME  = "ATTN_FTASAP"
