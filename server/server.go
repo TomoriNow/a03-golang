@@ -118,7 +118,7 @@ func HandleRequest(req HttpRequest) HttpResponse {
 			response.StatusCode = "200"
 			response.ContentType = "application/xml"
 			response.Data = string(xmlData)
-		} else if strings.Contains(req.Accept, "json") {
+		} else {
 			jsonData, err := json.Marshal(students)
 			if err != nil {
 				fmt.Println("Error:", err)
@@ -133,7 +133,7 @@ func HandleRequest(req HttpRequest) HttpResponse {
 			response.Data = "<html><body><h1>Halo, kami dari Klepon</h1></body></html>"
 			response.ContentType = "text/html"
 			response.StatusCode = "200"
-		} else if strings.Contains(req.AcceptLanguange, "en") {
+		} else {
 			response.Data = "<html><body><h1>Hello, we are from Klepon</h1></body></html>"
 			response.ContentType = "text/html"
 			response.StatusCode = "200"
